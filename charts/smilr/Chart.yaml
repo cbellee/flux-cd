@@ -15,5 +15,5 @@ sources:
 dependencies:
 - name: mongodb
   version: "^7.0.0"
-  repository: 
+  repository: "@bitnami"
   condition: mongodb.enabled
