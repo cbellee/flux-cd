@@ -15,5 +15,5 @@ sources:
 dependencies:
 - name: mongodb
   version: "^7.0.0"
-  repository: "@bitnami"
+  repository: https://kubernetes-charts.storage.googleapis.com/
   condition: mongodb.enabled
