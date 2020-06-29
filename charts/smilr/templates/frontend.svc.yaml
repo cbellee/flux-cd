@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ include "smilr.fullname" . }}-frontend
+  labels:
+{{ include "smilr.labels" . | indent 4 }} 
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+  selector:
+    app.kubernetes.io/name: {{ include "smilr.name" . }}-frontend
+    app.kubernetes.io/instance: {{ .Release.Name }}

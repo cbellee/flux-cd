@@ -1,0 +1,78 @@
+{{- $fullName := (printf "%s-sentiment" (include "smilr.fullname" .)) -}}
+{{- $name := (printf "%s-sentiment" (include "smilr.name" .)) -}}
+
+{{ if .Values.sentiment.enabled }}
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ $fullName }}
+  labels:
+{{ include "smilr.labels" . | indent 4 }} 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $name }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: {{ $name }}
+
+        image: {{ .Values.sentiment.image }}
+        imagePullPolicy: Always
+        
+        env:       
+        - name: Eula
+          value: accept
+        - name: Billing
+          value: https://{{ .Values.sentiment.region }}.api.cognitive.microsoft.com/text/analytics/v2.1
+        - name: ApiKey
+          valueFrom:
+            secretKeyRef:
+              name: {{ $fullName }}-secret
+              key: sentiment-key
+
+        ports:
+        - containerPort: 5000
+
+        resources:
+          requests:
+            memory: "300M" 
+            cpu: "50m"
+          limits:
+            memory: "2G" 
+            cpu: "500m"
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ $fullName }}
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000
+  selector:
+    app: {{ $name }}
+    release: {{ .Release.Name }}
+
+---
+
+kind: Secret
+apiVersion: v1
+metadata:
+  name: {{ $fullName }}-secret
+type: Opaque
+data:
+  sentiment-key: {{ .Values.sentiment.key | b64enc }}
+
+{{ end }}

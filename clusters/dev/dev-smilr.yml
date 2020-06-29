@@ -1,0 +1,57 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: dev-smilr
+  namespace: dev
+  annotations:
+    fluxcd.io/automated: "true"
+    filter.fluxcd.io/chart-image: glob:dev-*
+spec:
+  releaseName: dev-smilr
+  chart:
+    git: git@github.com:cbellee/flux-cd
+    path: charts/smilr
+    ref: master
+  values:
+    # Change to blank string to pull from prebuilt images on Docker Hub
+    repository: akspublicacr.azurecr.io/
+    ingress:
+      # If blank then path based routing will be used, and ingress IP can be used
+      # If set then release name will be prepended and host routing used 
+      domainSuffix: kainiindustries.net
+      # Ingress class annotation
+      class: nginx
+      # Set to enable TLS, when using cert-manager and dynamically issued certs 
+      certIssuer:
+      # Set to enable TLS with a static secret
+      certName:
+    dataApi:
+      image:
+        repository: akspublicacr.azurecr.io/
+        tag: dev-1.0.0
+      replicas: 2
+      # Leave blank to use the internal service, override if using external database
+      mongoConnStr: 
+      aadClientId:
+      imagePullPolicy: Always
+      
+    frontend:
+      image:
+        repository: akspublicacr.azurecr.io/
+        tag: dev-1.0.0
+      replicas: 2
+      aadClientId:
+      imagePullPolicy: Always
+
+    # sentiment:
+    #   enabled: false
+    #   key: changeme
+    #   region: changeme
+
+    # These are the defaults anyhow, change if you wish
+    mongodb:
+      persistence:
+        enabled: false
+      replicaSet:
+        enabled: false    
